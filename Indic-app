@@ -1,0 +1,27 @@
+############ Indicator species analysis ##########################
+install.packages("indicspecies")
+library(indicspecies)
+pc = read.csv(“PATH/merged_otu_metadata.csv", header= TRUE)
+
+
+
+#Rearrange the data
+
+df1 <- pc[,c("Sample", "Groups","Age")]
+
+df2<- pc[,c(2:9)]
+
+
+new.pc<- cbind(df1, df2)
+new.pc
+
+
+abund = new.pc[,4:ncol(new.pc)]
+Groups = new.pc$Groups
+
+inv = multipatt(abund, Groups, func = "r.g", control = how(nperm=9999))
+
+
+summary(inv)
+
+summary(inv, alpha=1)
