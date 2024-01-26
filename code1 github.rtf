@@ -1,0 +1,79 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2636
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww28600\viewh17440\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 ####### Creating a hypothetical otu table using matrix ####################################################\
+\
+####### To create a matrix of 8*8  ###########################################################\
+\
+otu_matrix= matrix(\
+  \
+  # Taking sequence of elements  \
+  c(1:64), \
+  \
+  # No of rows u want\
+  nrow = 8,   \
+  \
+  # No of columns u want\
+  ncol = 8,         \
+  \
+  # By default matrices are in column-wise order if TRUE otherwise with False its in row-wise order\
+  # So this parameter decides how to arrange the matrix\
+  byrow = T        \
+)\
+\
+# Naming of rows\
+rownames(otu_matrix) = c("OTU_1", "OTU_2", "OTU_3", "OTU_4", "OTU_5", "OTU_6", "OTU_7", "OTU_8")\
+\
+# Naming of columns\
+colnames(otu_matrix) = c("Sample_1", "Sample_2", "Sample_3", "Sample_4", "Sample_5", "Sample_6", "Sample_7", "Sample_8" )\
+\
+print(otu_matrix)\
+\
+\
+############ To make a hypothetical sample metadata ################################################\
+#create a data frame of sample, name and age\
+Sample <- c("Sample_1", "Sample_2", "Sample_3", "Sample_4", "Sample_5", "Sample_6", "Sample_7", "Sample_8")\
+Groups<- c("Control", "Control", "Control", "Control", "Treated", "Treated", "Treated", "Treated")\
+Age <- c(49, 42, 58, 61, 54, 34, 62, 29)\
+\
+metadata <- data.frame(Sample, Groups, Age)\
+print(metadata)\
+\
+#####################################################\
+\
+### Matrix into df #############################\
+otu_matrix.df=as.data.frame(otu_matrix)\
+class(otu_matrix.df)\
+\
+##transpose ##########################################\
+transpose <- t(otu_matrix.df)\
+\
+class(transpose)\
+\
+transpose.df=as.data.frame(transpose)\
+transpose.df\
+class(transpose.df)\
+\
+# adding a new column to the df\
+transpose.df$Sample = c("Sample_1", "Sample_2", "Sample_3", "Sample_4","Sample_5", "Sample_6", "Sample_7", "Sample_8" )  \
+\
+\
+\
+#perform inner join\
+merged_otu_metadata <- merge(transpose.df, metadata, by='Sample')\
+\
+\
+\
+############## To create a big matrix #################################################\
+\
+otu_matrix_2 = matrix(sample(1:500, 225 , replace = TRUE), nrow = 15, ncol = 15)\
+\
+rownames(otu_matrix_2) <- paste0("OTU", 1:nrow(otu_matrix_2))\
+\
+colnames(otu_matrix_2) <- paste0("Sample", 1:ncol(otu_matrix_2))\
+\
+otu_matrix_2}
