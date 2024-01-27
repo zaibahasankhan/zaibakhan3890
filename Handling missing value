@@ -1,0 +1,55 @@
+
+#######Missing value handling############################################################
+df <- read.csv("/Users/zaibahasankhan/Desktop/missing value handling - Sheet1.csv")
+
+which (is.na(df), arr.ind = T) #### where the NA is located 
+
+all_na = which (is.na(df), arr.ind = T) # assigning variable to the previous step to view
+
+###########
+colSums(is.na(df)) #columns containing missing values
+which(is.na(df$SampleA)) # to see missing values in each specific column
+
+
+``
+# Plot the diagram for missing values
+install.packages("visdat")
+library(visdat)
+
+vis_miss(df)
+############
+replaced.na <- df
+
+
+# Replace NA with pre-selected value : 0
+#Here we are replacing with 0
+replaced.na [all_na] = 0
+a <- replaced.na
+
+df #original file
+replaced.na #replaced with zero
+
+# Delete all the rows with NA (Here we need our first file having all the rows with NA which is df to run this command)
+
+removed_na = df[-all_na[,1],]
+
+dim(removed_na)
+dim (df) 
+ removed_na
+ df
+ 
+ ############ Replacing NA for all columns with mean( ) function ########################
+ df$SampleA[is.na(df$SampleA)]<-mean(df$SampleA,na.rm=TRUE)
+ 
+ df
+ 
+ ############# Replacing NA with each column's mean ##################
+ # using colMeans()
+ mean_val <- colMeans(df,na.rm = TRUE)
+ 
+ # replacing NA with mean value of each column 
+ for(i in colnames(df))
+   df[,i][is.na(df[,i])] <- mean_val[i]
+ 
+ 
+ df
