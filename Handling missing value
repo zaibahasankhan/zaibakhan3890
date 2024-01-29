@@ -18,7 +18,7 @@ library(visdat)
 
 vis_miss(df)
 ############
-replaced.na <- df
+replaced.na <- df #changing the name
 
 
 # Replace NA with pre-selected value : 0
@@ -27,7 +27,7 @@ replaced.na [all_na] = 0
 a <- replaced.na
 
 df #original file
-replaced.na #replaced with zero
+replaced.na #file replaced with zero
 
 # Delete all the rows with NA (Here we need our first file having all the rows with NA which is df to run this command)
 
