@@ -1,0 +1,150 @@
+#load the required libraries
+
+library(Seurat)
+library(patchwork)
+library(dplyr)
+library(ggplot2)
+
+#download the data
+#wget https://cf.10xgenomics.com/samples/cell-exp/6.1.0/40k_NSCLC_DTC_3p_HT_nextgem_Multiplex/40k_NSCLC_DTC_3p_HT_nextgem_Multiplex_count_raw_feature_bc_matrix.tar.gz
+
+
+# Load the dataset
+
+pbmc3k <- Read10X(data.dir =“PATH…../filtered_gene_bc_matrices/hg19/")
+View(pbmc3k)
+
+# 1. Initialize the Seurat object with the raw data (non-normalized)
+seurat.object <- CreateSeuratObject(counts = pbmc3k, project = "PBMC3K", min.cells = 3, min.features = 200)
+seurat.object
+
+#13714 features across 2700
+#str(nsclc.seurat.obj) #summary of the data
+
+
+
+# 2. QC and selecting cells
+# % MT reads  (% of mt reads)
+
+# The [[ operator can add columns to object metadata. This is a great place to stash QC stats
+seurat.object[["percent.mt"]] <- PercentageFeatureSet(seurat.object, pattern = "^MT-")
+View(seurat.object@meta.data) #to view metadata from seurat object
+head(seurat.object@meta.data, 5) # Show QC metrics for the first 5 cells
+
+
+# Visualize QC metrics as a violin plot
+VlnPlot(seurat.object, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3) ####violin plot
+
+plot1 <- FeatureScatter(seurat.object, feature1 = "nCount_RNA", feature2 = "percent.mt")
+plot2 <- FeatureScatter(seurat.object, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+plot1 + plot2
+
+# 3. Filtering  (low qualty cells and mt reads) # cells should have more than 200 genes but less than 2500
+seurat.object <- subset(seurat.object, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+
+View(seurat.object@meta.data)
+
+# 4. Normalizing the data  (lognormalization)
+seurat.object <- NormalizeData(seurat.object, normalization.method = "LogNormalize", scale.factor = 10000)
+# OR
+#seurat.object <- NormalizeData(seurat.object)
+str(nsclc.seurat.obj)
+
+# 5. Identify highly variable features 
+seurat.object <- FindVariableFeatures(seurat.object, selection.method = "vst", nfeatures = 2000)
+
+# to see the variable features
+# Identify 10 most highly variable genes
+top10 <- head(VariableFeatures(seurat.object), 10)
+top10
+
+# plot variable features with and without labels
+plot1 <- VariableFeaturePlot(seurat.object)
+plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+plot1 + plot2
+
+# 6. Scaling of the data
+all.genes <- rownames(seurat.object)
+seurat.object <- ScaleData(seurat.object, features = all.genes)
+
+## To remove unwanted sources of variation
+ScaleData(seurat.object, vars.to.regress = "percent.mt")
+
+# 7. Perform Linear dimensionality reduction 
+seurat.object <- RunPCA(seurat.object, features = VariableFeatures(object = seurat.object))
+# visualize PCA results
+print(seurat.object[["pca"]], dims = 1:5, nfeatures = 5) #top 5 features
+DimHeatmap(seurat.object, dims = 1, cells = 500, balanced = TRUE) #heatmap of 1PCA for 500 cells 
+DimHeatmap(seurat.object, dims = 2, cells = 500, balanced = TRUE) #heatmap of 2PCA for 500 cells 
+
+VizDimLoadings(seurat.object, dims = 1:2, reduction = "pca")
+
+DimPlot(seurat.object, reduction = "pca") + NoLegend()
+
+DimHeatmap(seurat.object, dims = 1, cells = 500, balanced = TRUE)
+DimHeatmap(seurat.object, dims = 1:15, cells = 500, balanced = TRUE)
+
+# To determine dimensionality of the data
+ElbowPlot(seurat.object) 
+
+# 8. Cluster the cells 
+
+seurat.object <- FindNeighbors(seurat.object, dims = 1:10)
+seurat.object <- FindClusters(seurat.object, resolution = 0.5)
+
+# Look at cluster IDs of the first 5 cells
+head(Idents(seurat.object), 5)
+
+# 9. Run non-linear dimensional reduction (UMAP/tSNE)
+seurat.object <- RunUMAP(seurat.object, dims = 1:10)
+# note that you can set `label = TRUE` or use the LabelClusters function to help label
+# individual clusters
+DimPlot(seurat.object, reduction = "umap")
+
+# 10. Finding differentially expressed features (cluster biomarkers)
+# find all markers of cluster 2
+cluster2.markers <- FindMarkers(seurat.object, ident.1 = 2)
+head(cluster2.markers, n = 5)
+# find all markers distinguishing cluster 5 from clusters 0 and 3
+cluster5.markers <- FindMarkers(seurat.object, ident.1 = 5, ident.2 = c(0, 3))
+head(cluster5.markers, n = 5)
+
+# find markers for every cluster compared to all remaining cells, report only the positive
+# ones
+pbmc.markers <- FindAllMarkers(seurat.object, only.pos = TRUE)
+pbmc.markers %>%
+  group_by(cluster) %>%
+  dplyr::filter(avg_log2FC > 1)
+
+cluster0.markers <- FindMarkers(seurat.object, ident.1 = 0, logfc.threshold = 0.25, test.use = "roc", only.pos = TRUE)
+
+VlnPlot(seurat.object, features = c("MS4A1", "CD79A"))
+
+# you can plot raw counts as well
+VlnPlot(seurat.object, features = c("NKG7", "PF4"), slot = "counts", log = TRUE)
+
+FeaturePlot(seurat.object, features = c("MS4A1", "GNLY", "CD3E", "CD14", "FCER1A", "FCGR3A", "LYZ", "PPBP",
+                               "CD8A"))
+
+pbmc.markers %>%
+  group_by(cluster) %>%
+  dplyr::filter(avg_log2FC > 1) %>%
+  slice_head(n = 10) %>%
+  ungroup() -> top10
+DoHeatmap(seurat.object, features = top10$gene) + NoLegend()
+
+# 11. Assigning cell type identity to clusters
+new.cluster.ids <- c("Naive CD4 T", "CD14+ Mono", "Memory CD4 T", "B", "CD8 T", "FCGR3A+ Mono",
+                     "NK", "DC", "Platelet")
+names(new.cluster.ids) <- levels(seurat.object)
+seurat.object <- RenameIdents(seurat.object, new.cluster.ids)
+DimPlot(seurat.object, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+
+
+plot <- DimPlot(seurat.object, reduction = "umap", label = TRUE, label.size = 4.5) + xlab("UMAP 1") + ylab("UMAP 2") +
+  theme(axis.title = element_text(size = 18), legend.text = element_text(size = 18)) + guides(colour = guide_legend(override.aes = list(size = 10)))
+ggsave(filename = “……./output/images/pbmc3k_umap.jpg", height = 7, width = 12, plot = plot, quality = 50)
+
+
+
+
