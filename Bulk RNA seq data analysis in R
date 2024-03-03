@@ -1,4 +1,4 @@
-#Bulk RNAseq Analysis
+#Bulk RNAseq Analysis: from raw sequences to count matrix 
 
 #Set up the working directory
 getwd()
@@ -41,7 +41,7 @@ destination<-"Saccharomyces_cerevisiae.R64-1-1.96.gtf.gz"
 download.file(url,destination)
 gunzip(destination)
 
-##########################
+#To run fastqc #
 fastqc_install()
 fastqc()
 qc <- qc_aggregate("FASTQC/")
