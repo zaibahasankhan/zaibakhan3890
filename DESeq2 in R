@@ -1,0 +1,133 @@
+#Install DESeq2 and load the library
+#install.packages("DESeq2")
+
+# DESeq2 installation
+#if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+#BiocManager::install("DESeq2")
+
+
+#library("DESeq2")
+
+#load the count data
+Count_data = read.csv(file = "/.../...../file.csv", header = T, sep = ",", row.names=1,check.names = FALSE)
+dim(Count_data)
+Count_data
+
+#load column data (what each column represents)
+Col_data = read.csv(file = "/../../.csv", header = T, row.names=1,check.names = FALSE)
+Col_data
+
+colnames(Count_data)
+row.names(Col_data)
+all(rownames(Col_data)==colnames(Count_data))
+
+
+
+#count number of NA values in matrix
+(is.na(Count_data)) #False if NA is not there, otherwise True
+sum(is.na(Count_data)) #how many NAs are there
+which(is.na(Count_data),arr.ind=TRUE) #where
+
+#Count_data <- na.omit(Count_data) #to remove row with NA
+#replace NA values in matrix with zero
+Count_data[is.na(Count_data)] <- 0
+
+#for (i in seq_along(Count_data)) {Count_data[[i]][is.na(Count_data[[i]])] <- mean(Count_data[[i]], na.rm = TRUE)} #replaace NA with the mean of column
+
+#Filteration of data (remove genes with all zero values) #optional step
+Count_data <-Count_data[rowSums(Count_data[])>0,]
+
+##################################################################################################
+
+library(DESeq2) # load the DESeq2 package
+?DESeq
+
+#creating deseq object
+dds = DESeqDataSetFromMatrix(countData = Count_data,
+                             colData = Col_data,
+                             design = ~condition) # we're testing for the different conditions
+
+dds
+
+
+
+
+#check the factor level before setting the factor level
+dds$condition
+
+#set the factor level 
+dds$condition <- relevel(dds$condition, ref = "normal")  #untreated/normal/susceptible
+
+#filtration (optional)
+filtered_count <- rowSums(counts(dds)) >=10 #filter those rows with atleast 10 reads in total
+dds <- dds[filtered_count,]
+
+# Run DESeq
+dds <- DESeq(dds)
+res1 <- results(dds)
+summary(res1)
+res1
+
+resultsNames(dds)
+
+#####################################
+
+# Count the number of upregulated and downregulated genes
+upregulated <- sum(res1$log2FoldChange > 1 & res1$padj < 0.05, na.rm = TRUE)
+downregulated <- sum(res1$log2FoldChange < -1 & res1$padj < 0.05, na.rm = TRUE)
+
+upregulated
+downregulated 
+
+#####################################
+
+# Filter out NA values in padj
+filtered_res1 <- res1[!is.na(res1$padj), ]
+
+# Get upregulated genes (log2FoldChange > 1 and padj < 0.05)
+upregulated_genes <- filtered_res1[filtered_res1$log2FoldChange > 1 & filtered_res1$padj < 0.05, ]
+
+# Get downregulated genes (log2FoldChange < -1 and padj < 0.05)
+downregulated_genes <- filtered_res1[filtered_res1$log2FoldChange < -1 & filtered_res1$padj < 0.05, ]
+
+# Add gene IDs as a new column
+upregulated_genes$gene_id <- rownames(upregulated_genes)
+downregulated_genes$gene_id <- rownames(downregulated_genes)
+
+# Reorder columns so gene_id is the first column
+upregulated_genes <- upregulated_genes[, c("gene_id", colnames(upregulated_genes)[colnames(upregulated_genes) != "gene_id"])]
+downregulated_genes <- downregulated_genes[, c("gene_id", colnames(downregulated_genes)[colnames(downregulated_genes) != "gene_id"])]
+
+# Write the upregulated genes to a CSV file
+write.csv(upregulated_genes, "upregulated_genes.csv", row.names = FALSE)
+
+# Write the downregulated genes to a CSV file
+write.csv(downregulated_genes, "downregulated_genes.csv", row.names = FALSE)
+
+# Get the counts
+upregulated <- nrow(upregulated_genes)
+downregulated <- nrow(downregulated_genes)
+upregulated
+downregulated 
+# Print the counts
+print(paste("Upregulated genes: ", upregulated))
+print(paste("Downregulated genes: ", downregulated))
+
+
+# Combine upregulated and downregulated genes into a single data frame
+combined_genes <- rbind(upregulated_genes, downregulated_genes)
+
+
+# Write the combined genes to a CSV file
+write.csv(combined_genes, "combined_up_down_regulated_genes.csv", row.names = FALSE)
+
+
+#######################################################################################
+
+#if normalized data is required
+
+norm_counts <- counts(dds, normalized = TRUE) #normalized data
+head(norm_counts)
+write.csv(norm_counts, "norm_count_G2T3_Water_Vs_G1T3_Stress.csv")
