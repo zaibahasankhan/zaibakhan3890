@@ -1,0 +1,83 @@
+#library(EnhancedVolcano)
+
+EnhancedVolcano(res1,                                 
+                lab = rownames(res1),                                 
+                x = 'log2FoldChange',                                 
+                y = 'pvalue',                                 
+                #selectLab = c( ),                                 
+                xlab = bquote(~Log[2]~ 'fold change'),
+                ylab = bquote(~-Log[10]~italic(P)),                                 
+                pCutoff = 0.05,                                 
+                FCcutoff = 1.0,                                 
+                colAlpha = 1,                                 
+                shape = 19,                                 
+                legendPosition = 'top',                                 
+                legendLabSize = 12,                                 
+                legendIconSize = 4.0,                                 
+                gridlines.major = FALSE,                                 
+                gridlines.minor = FALSE,                                 
+                drawConnectors = TRUE,                                 
+                widthConnectors = 1.0,                                 
+                colConnectors = 'black',                                 
+                labSize = 3.0,                                 
+                pointSize = 1.0,                                 
+                border = 'full',                
+                title = NULL,  # No title                
+                subtitle = paste0("Upregulated: ", upregulated, 
+                                  " | Downregulated: ", downregulated),  # Add subtitle with counts
+                max.overlaps = 20)
+
+
+
+
+######### labeling genes top 10 (down and up) #######################
+
+EnhancedVolcano(res1,                                 
+                lab = rownames(res1),                                 
+                x = 'log2FoldChange',                                 
+                y = 'pvalue',                                 
+                selectLab = c(
+                  'SbiBTX642.02G430600',
+                  'SbiBTX642.08G054200',
+                  'SbiBTX642.04G198000',
+                  'SbiBTX642.08G105200',
+                  'SbiBTX642.02G408900',
+                  'SbiBTX642.05G228900',
+                  'SbiBTX642.03G188800',
+                  'SbiBTX642.05G144700',
+                  'SbiBTX642.04G100300',
+                  'SbiBTX642.07G186700',
+                
+                  'SbiBTX642.01G549000',
+                  'SbiBTX642.09G184400',
+                  'SbiBTX642.03G276400',
+                  'SbiBTX642.04G208000',
+                  'SbiBTX642.08G049100',
+                  'SbiBTX642.04G331300',
+                  'SbiBTX642.02G380700',
+                  'SbiBTX642.06G234300',
+                  'SbiBTX642.07G178100',
+                  'SbiBTX642.08G110900'
+                ),                                 
+                xlab = bquote(~Log[2]~ 'fold change'),
+                ylab = bquote(~-Log[10]~italic(P)),                                 
+                pCutoff = 0.05,                                 
+                FCcutoff = 1.0,                                 
+                colAlpha = 1,                                 
+                shape = 19,                                 
+                legendPosition = 'top',                                 
+                legendLabSize = 12,                                 
+                legendIconSize = 4.0,                                 
+                gridlines.major = FALSE,                                 
+                gridlines.minor = FALSE,                                 
+                drawConnectors = TRUE,                                 
+                widthConnectors = 1.0,                                 
+                colConnectors = 'black',                                 
+                labSize = 3.0,                                 
+                pointSize = 1.0,                                 
+                border = 'full',                
+                title = NULL,  # No title                
+                subtitle = paste0("Upregulated: ", upregulated, 
+                                  " | Downregulated: ", downregulated),  # Add subtitle with counts
+                max.overlaps = 20)
+
