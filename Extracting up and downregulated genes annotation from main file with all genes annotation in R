@@ -1,0 +1,51 @@
+# Read the CSV files
+file1 <- combined_up_down_regulated_genes
+file2 <- Genelist
+
+# Assuming the column containing gene names is called 'gene' in both files
+genes_file1 <- file1$gene_id
+genes_file2 <- file2$gene_id
+
+
+
+# Check for matches
+matching_genes <- intersect(genes_file1, genes_file2)
+
+# Genes in file1 but not in file2
+genes_in_file1_not_in_file2 <- setdiff(genes_file1, genes_file2)
+
+# Genes in file2 but not in file1
+genes_in_file2_not_in_file1 <- setdiff(genes_file2, genes_file1)
+
+# Display the results
+cat("Matching genes: ", length(matching_genes), "\n")
+cat("Genes in file1 but not in file2: ", length(genes_in_file1_not_in_file2), "\n")
+cat("Genes in file2 but not in file1: ", length(genes_in_file2_not_in_file1), "\n")
+
+######################################################################################
+# Read the CSV files
+
+
+# Assuming 'gene' is the column with gene names and 'function' is the column with gene functions in file2
+# Perform a left join to merge the function column from file2 into file1
+file1_updated <- merge(file1, file2[, c("gene_id", "Function_rice")], by = "gene_id", all.x = TRUE)
+
+
+# Remove any duplicate rows based on the 'Gene' column (or all columns if needed)
+file1_updated <- file1_updated[!duplicated(file1_updated), ]
+
+
+file2_updated <- merge(file1_updated, file2[, c("gene_id", "Function_Arabidopsis")], by = "gene_id", all.x = TRUE)
+file2_updated <- file2_updated[!duplicated(file2_updated), ]
+
+
+file3_updated <- merge(file2_updated, file2[, c("gene_id", "Annotation_At")], by = "gene_id", all.x = TRUE)
+file3_updated <- file3_updated[!duplicated(file3_updated), ]
+
+
+file4_updated <- merge(file3_updated, file2[, c("gene_id", "Annotation_Os")], by = "gene_id", all.x = TRUE)
+file4_updated <- file4_updated[!duplicated(file4_updated), ]
+
+# Save the updated file1
+
+write.csv(file4_updated, "All_up_down_genes_with_functions_annotation.csv", row.names = FALSE)
