@@ -1,0 +1,48 @@
+#library(dplyr)
+df <-BP_up_Table_1
+df1 <- BP_down_Table_1
+
+df2 <-rbind(df,df1)
+colnames(df2)[colnames(df2) == "PValue"] <- "p-value"
+
+df2$Genes <- NA  # Initialize the new column with NA
+# Set values based on row numbers
+df2$Genes[1:76] <- "upregulated"    # For rows 1 to 4
+df2$Genes[77:233] <- "downregulated" # For rows 5 to 28
+df2 <- select(df2,2,3,5,10)
+df2
+print(df2, n=Inf)
+go_data<- df2
+
+
+# Rename the column "Fold enrichment" to "Fold_Enrichment"
+colnames(df2)[colnames(df2) == "Fold Enrichment"] <- "Fold_Enrichment"
+colnames(df2)[colnames(df2) == "p-value"] <- "p_value"
+
+#go_data<- df2
+
+
+# Plotting BP lollipop plot
+
+#library(ggplot2)
+
+ggplot(go_data, aes(x = Fold_Enrichment, y = reorder(Term, Fold_Enrichment), color = Genes)) + 
+  geom_segment(aes(xend = Fold_Enrichment, yend = Term), color = "grey") + 
+  geom_point(aes(size = Count, fill = -log10(p_value)), shape = 21, size = 7) + 
+  scale_fill_gradient(low = "blue", high = "red", name = "-log10(p_value)") + 
+  scale_color_manual(values = c("upregulated" = "red", "downregulated" = "green"), name = "Genes") + 
+  theme_minimal() + 
+  labs(title = "GO plot for Biological Process", 
+       x = "Fold Enrichment", 
+       y = "GO Terms", 
+       size = "Count", 
+       color = "Genes") +  # Updated color label
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"), 
+        axis.title.x = element_text(size = 10, face = "bold"),  
+        axis.title.y = element_text(size = 14, face = "bold"),  
+        axis.text.y = element_text(size = 6)) + 
+  guides(color = guide_legend(order = 1),  # Place Genes first
+         fill = guide_colorbar(order = 2)) +  # Place -log10(p_value) second
+  theme(legend.position = "right")
+
+
