@@ -11,7 +11,7 @@ library(data.table)
 library(Rqc)
 library(fastqcr)
 
-#Download the data (FastQ) 
+#Download the data (FastQ files) 
 url.S1R1<-"ftp.sra.ebi.ac.uk/vol1/fastq/SRR592/006/SRR5924196/SRR5924196_1.fastq.gz"
 destination.1<-"SRR5924196_1.fastq.gz"
 download.file(url.S1R1,destination.1)
