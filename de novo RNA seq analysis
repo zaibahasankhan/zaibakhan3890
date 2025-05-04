@@ -2,7 +2,7 @@
 
 ###### fastQC ########
 
-#fastqc         $PATH/.fastq            
+#fastqc         PATH/.fastq            
 
 #for more than one sequence 
 
@@ -10,60 +10,58 @@
 
 
 ########For trimming of adapters sequence with Cutadapt #######################
-#cutadapt -b ATDAPER_SEQ  -q 30,30 -o $PATH/trimmed_R1.fastq $PATH/R1.fastq
+#cutadapt -b ATDAPER_SEQ  -q 30,30 -o PATH/trimmed_R1.fastq $PATH/R1.fastq
 
-#cutadapt -a ATDAPER_SEQ  -q 30,30 -o $PATH/trimmed_R1.fastq $PATH/R1.fastq
+#cutadapt -a ATDAPER_SEQ  -q 30,30 -o PATH/trimmed_R1.fastq $PATH/R1.fastq
 
-#cutadapt -a AACCGGTT -o $PATH/trimmed_R1.fastq $PATH/R1.fastq 
+#cutadapt -a AACCGGTT -o PATH/trimmed_R1.fastq PATH/R1.fastq 
 
-#cutadapt -a ADAPTER_FWD -A ADAPTER_REV -o $PATH/trimmmed_R1.fastq -p $PATH/trimmed_R2.fastq $PATH/R1.fastq $PATH/R2.fastq
+#cutadapt -a ADAPTER_FWD -A ADAPTER_REV -o PATH/trimmmed_R1.fastq -p PATH/trimmed_R2.fastq PATH/R1.fastq PATH/R2.fastq
 
 
 ######### To join all the seqs together ############################
 
-# cat $PATH/*_R1.fastq > ALL_R1.fq
-# cat  $PATH/*_R2.fastq > ALL_R2.fq
- # cat $PATH/*_1 > ALL_R1.fq
- # cat $PATH/*_2  > ALL_R2.fq
+# cat PATH/*_R1.fastq > ALL_R1.fq
+# cat  PATH/*_R2.fastq > ALL_R2.fq
+ # cat PATH/*_1 > ALL_R1.fq
+ # cat PATH/*_2  > ALL_R2.fq
 ######### convert fastq to fasta  ################################
 #paste - - - - < ALL_R1.fq | cut -f 1,2 | sed 's/^@/>/' | tr "\t" "\n" > ALL_R1.fa
 #paste - - - - < ALL_R2.fq | cut -f 1,2 | sed 's/^@/>/' | tr "\t" "\n" > ALL_R2.fa
 
 ########## for read visualization ################################
 
-#cat $PATH/.fastq | grep "@" | wc -l
+#cat PATH/.fastq | grep "@" | wc -l
 
 ###Transcriptome assembly with trinity #############################
 #Single end data
 #TRINITY_DIR/Trinity --seqType fa \
-#--single $PATH/ALL.fa \
+#--single PATH/ALL.fa \
 #--SS_lib_type F \
 #--max_memory 2G \
 #--CPU 2 \
-#--output $PATH/Trinity_output
+#--output PATH/Trinity_output
 
-# For fq files (individual)
-#TRINITY_DIR/Trinity --seqType fq \ #--single Sample1.R1.fq, Sample2.R1.fq, Sample3.R1.fq, Sample4.R1.fq \ --SS_lib_type F \ #--max_memory 2G \ #--CPU 2 \ #--output /workdir/Trinity_output
 
 ## for paired end data
 #TRINITY_DIR/Trinity --seqType fa \
-#--left $PATH/ALL_R1.fa \
-#--right $PATH/ALL_R2.fa \
+#--left PATH/ALL_R1.fa \
+#--right PATH/ALL_R2.fa \
 #--SS_lib_type RF \
 #--max_memory 2G \
 #--CPU 2 \
-#--output $PATH/Trinity_output
+#--output PATH/Trinity_output
 
 
 # For fq files (individual)
 #TRINITY_DIR/Trinity --seqType fq \ --left Sample1_R1.fq, Sample2_R1.fq, Sample3_R1.fq, Sample4_R1.fq \ 
-#--right Sample1_R2.fq, Sample2_R2.fq, Sample3_R2.fq, Sample4_R2.fq \ --SS_lib_type RF \ --max_memory 2G \ --CPU 2 \ --output $PATH/Trinity_output
+#--right Sample1_R2.fq, Sample2_R2.fq, Sample3_R2.fq, Sample4_R2.fq \ --SS_lib_type RF \ --max_memory 2G \ --CPU 2 \ --output PATH/Trinity_output
 ############################################
 
 # Conda to install trinity ############### 
  
  #Trinity --seqType fa --SS_lib_type R  \
-          # --single $PATH/ALL.fa \
+          # --single PATH/ALL.fa \
            #--CPU 2 --max_memory 10G         #as required
 
 
@@ -71,35 +69,35 @@
 ################## Assembly stats ###################(Output from the trinity in the form of fasta)
 #conda install bioconda::assembly-stats
 
-#assembly-stats $PATH/Trinity.fasta > Assembly_stats.txt
+#assembly-stats PATH/Trinity.fasta > Assembly_stats.txt
 
 ############################################
 
 ####abundance estimation using RSEM ###########
 
 # TRINITY_HOME/util/align_and_estimate_abundance.pl --seqType fq \
-#--single $PATH/Sample1_R1.fq \
-#--transcripts $PATH/Trinity.fasta \
+#--single PATH/Sample1_R1.fq \
+#--transcripts PATH/Trinity.fasta \
 #--SS_lib_type F \
 #--est_method RSEM \
 #--aln_method bowtie \                                                                 #check with bowtie/bowtie2
 #--trinity_mode \
 #--prep_reference \
-#--output_dir $PATH/RSEM_Sample1
+#--output_dir PATH/RSEM_Sample1
 
 
 
 
  #TRINITY_HOME/util/align_and_estimate_abundance.pl --seqType fq \
-         #--left $PATH/Sample1_R1.fastq \
-        # --right $PATH/Sample1_R2.fastq \
-        # --transcripts $PATH/Trinity.fasta  \
+         #--left PATH/Sample1_R1.fastq \
+        # --right PATH/Sample1_R2.fastq \
+        # --transcripts PATH/Trinity.fasta  \
         # --est_method RSEM  --aln_method bowtie2 \
         # --trinity_mode --prep_reference \
-        # --output_dir $PATH/RSEM_SAMPLE1_paired
+        # --output_dir PATH/RSEM_SAMPLE1_paired
 
 
- #head $PATH_of_isoforms.results | column -t                            
+ #head PATH_of_isoforms.results | column -t                            
 
 #################### to create a count matrix for DE analysis##########
 #TRINITY_HOME/util/abundance_estimates_to_matrix.pl \
@@ -107,7 +105,7 @@
    #--gene_trans_map 'none' \
    #--out_prefix abundance_counts \
    #--name_sample_by_basedir \
-      #$PATH/RSEM_SAMPLE1_paired/RSEM.isoforms.results                     #repeat this line for multiple samples
+      #PATH/RSEM_SAMPLE1_paired/RSEM.isoforms.results                     #repeat this line for multiple samples
      
 
 
@@ -117,8 +115,8 @@
 ######### Differential expression analysis using edgeR ###################
 
 #TRINITY_HOME/Analysis/DifferentialExpression/run_DE_analysis.pl \
- # --matrix $PATH/abundance_counts.matrix \
- # --samples_file $PATH/sample \
+ # --matrix PATH/abundance_counts.matrix \
+ # --samples_file PATH/sample \
  # --method edgeR \
  # --dispersion 0.01 \
  # --output edgeR
@@ -132,7 +130,7 @@
 ############ Transdecoder ################
 #Predicting coding regions from a transcript fasta file
 #extract the long open reading frames
-#Downloads/TransDecoder-TransDecoder-v5.7.1/TransDecoder.LongOrfs -t $PATH/Trinity.fasta
+#Downloads/TransDecoder-TransDecoder-v5.7.1/TransDecoder.LongOrfs -t  PATH/Trinity.fasta
 
 #######ncbi-blast ##################
 ### download protein seq using Uniprot ############################################
